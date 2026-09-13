@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getAppointmentsByHospital } from '../api/appointments';
 import { getDoctorsByHospital } from '../api/doctors';
-import { getHospitals } from '../api/hospitals';
+import { getHospitalById } from '../api/hospitals';
 import { getPatientsByHospital } from '../api/patients';
 import { getUserById, getUsersByHospital } from '../api/users';
 import { useAuth } from '../context/AuthContext';
@@ -38,15 +38,14 @@ export default function ManagerDashboardPage() {
         }
 
         const [hospitalResponse, doctorsResponse, patientsResponse, appointmentsResponse, staffResponse] = await Promise.all([
-          getHospitals(),
+          getHospitalById(hospitalId).catch(() => ({ data: { data: null } })),
           getDoctorsByHospital(hospitalId).catch(() => ({ data: { data: [] } })),
           getPatientsByHospital(hospitalId).catch(() => ({ data: { data: [] } })),
           getAppointmentsByHospital(hospitalId).catch(() => ({ data: { data: [] } })),
           getUsersByHospital(hospitalId).catch(() => ({ data: { data: [] } })),
         ]);
 
-        const hospitalList = hospitalResponse.data.data || [];
-        const nextHospital = hospitalList.find((item) => item.id === hospitalId) || null;
+        const nextHospital = hospitalResponse.data.data || null;
 
         setHospital(nextHospital);
         setDoctors(doctorsResponse.data.data || []);
