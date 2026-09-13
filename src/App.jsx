@@ -19,10 +19,12 @@ import ManagerProfilePage from './pages/ManagerProfilePage';
 import DoctorDashboardPage from './pages/DoctorDashboardPage';
 import DoctorAppointmentsPage from './pages/DoctorAppointmentsPage';
 import DoctorProfilePage from './pages/DoctorProfilePage';
+import { Analytics } from '@vercel/analytics/react';
 
 function App() {
   return (
-    <Routes>
+    <>
+         <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/" element={<Navigate to="/login" replace />} />
 
@@ -57,6 +59,9 @@ function App() {
         </Route>
       </Route>
     </Routes>
+
+    <Analytics/>
+    </>
   );
 }
 
