@@ -123,24 +123,11 @@ export default function ManagerDashboardPage() {
           onClick={() => toggleStatus(row.rawAppointment)}
           className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium transition ${
             row.status === 'active'
-              ? 'bg-emerald-100 text-emerald-700 ring-1 ring-inset ring-emerald-600/20'
-              : 'bg-amber-100 text-amber-700 ring-1 ring-inset ring-amber-600/20'
+              ? 'bg-emerald-200 text-emerald-800 ring-1 ring-inset ring-emerald-700/20'
+              : 'bg-orange-300 text-orange-900 ring-1 ring-inset ring-orange-700/30'
           }`}
         >
           {row.status === 'active' ? 'Active' : 'Inactive'}
-        </button>
-      ),
-    },
-    {
-      key: 'actions',
-      label: 'Actions',
-      render: (_, row) => (
-        <button
-          type="button"
-          onClick={() => toggleStatus(row.rawAppointment)}
-          className="rounded-lg bg-sky-600 px-2 py-1 text-xs font-medium text-white hover:bg-sky-700"
-        >
-          Toggle Status
         </button>
       ),
     },
@@ -189,7 +176,9 @@ export default function ManagerDashboardPage() {
             columns={columns}
             rows={rows}
             emptyMessage="No appointments found."
-            rowClassName={(row) => (row.status === 'active' ? 'bg-emerald-50/80' : '')}
+            rowClassName={(row) =>
+              row.status === 'active' ? 'bg-emerald-300/80' : 'bg-orange-300/90'
+            }
           />
         )}
       </div>

@@ -208,8 +208,8 @@ export default function ManagerAppointmentsPage() {
           onClick={() => toggleStatus(appointment)}
           className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium transition ${
             appointment.status === 'active'
-              ? 'bg-emerald-100 text-emerald-700 ring-1 ring-inset ring-emerald-600/20'
-              : 'bg-amber-100 text-amber-700 ring-1 ring-inset ring-amber-600/20'
+              ? 'bg-emerald-200 text-emerald-800 ring-1 ring-inset ring-emerald-700/20'
+              : 'bg-orange-300 text-orange-900 ring-1 ring-inset ring-orange-700/30'
           }`}
         >
           {appointment.status === 'active' ? 'Active' : 'Inactive'}
@@ -266,7 +266,9 @@ export default function ManagerAppointmentsPage() {
             ...appointment,
             patient_name: patients.find((patient) => patient.id === appointment.patient_id)?.name || 'Unknown',
           }))}
-          rowClassName={(row) => (row.status === 'active' ? 'bg-emerald-50/80' : '')}
+          rowClassName={(row) =>
+            row.status === 'active' ? 'bg-emerald-200/90' : 'bg-orange-200/90'
+          }
         />
       )}
 
