@@ -58,6 +58,11 @@ export default function ManagerDoctorsPage() {
     loadDoctors();
   }, [user]);
 
+  const doctorUsers = useMemo(
+    () => users.filter((item) => item.role === 'doctor'),
+    [users]
+  );
+
   const filteredDoctors = useMemo(() => {
     const term = search.trim().toLowerCase();
 
@@ -197,18 +202,21 @@ export default function ManagerDoctorsPage() {
       <Modal open={modalOpen} title={editing ? 'Edit doctor' : 'Add doctor'} onClose={closeModal}>
         <form className="space-y-4" onSubmit={handleSubmit} noValidate>
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">User</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Doctor user</label>
             <select
               value={form.user_id}
               onChange={(event) => setForm((prev) => ({ ...prev, user_id: event.target.value }))}
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
             >
-              <option value="">Select user</option>
-              {users.map((userItem) => (
+              <option value="">Select doctor</option>
+              {doctorUsers.map((userItem) => (
                 <option key={userItem.id} value={userItem.id}>{userItem.name}</option>
               ))}
             </select>
             {formErrors.user_id && <p className="mt-1 text-xs text-red-600">{formErrors.user_id}</p>}
+            {!doctorUsers.length && (
+              <p className="mt-1 text-xs text-amber-600">No doctor-role users found. Add a user first, then create the doctor record.</p>
+            )}
           </div>
 
           <div>
