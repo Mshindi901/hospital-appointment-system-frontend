@@ -9,7 +9,7 @@ export default function Navbar({ title, subtitle, onMenuToggle }) {
   const handleLogout = () => {
     setIsLoggingOut(true);
     logout();
-    window.location.href = '/login';
+    window.location.href = '/';
   };
 
   return (
