@@ -260,7 +260,14 @@ export default function ManagerAppointmentsPage() {
       {filteredAppointments.length === 0 ? (
         <EmptyState title="No appointments found." message="No appointments match the current filters." />
       ) : (
-        <DataTable columns={columns} rows={filteredAppointments.map((appointment) => ({ ...appointment, patient_name: patients.find((patient) => patient.id === appointment.patient_id)?.name || 'Unknown' }))} />
+        <DataTable
+          columns={columns}
+          rows={filteredAppointments.map((appointment) => ({
+            ...appointment,
+            patient_name: patients.find((patient) => patient.id === appointment.patient_id)?.name || 'Unknown',
+          }))}
+          rowClassName={(row) => (row.status === 'active' ? 'bg-emerald-50/80' : '')}
+        />
       )}
 
       <Modal open={modalOpen} title={editing ? 'Edit appointment' : 'Add appointment'} onClose={closeModal}>

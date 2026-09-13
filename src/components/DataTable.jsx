@@ -1,6 +1,6 @@
 import { ArrowUpDown } from 'lucide-react';
 
-export default function DataTable({ columns, rows, emptyMessage = 'No records found.' }) {
+export default function DataTable({ columns, rows, emptyMessage = 'No records found.', rowClassName }) {
   if (!rows || rows.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-slate-500">
@@ -28,15 +28,19 @@ export default function DataTable({ columns, rows, emptyMessage = 'No records fo
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-200 bg-white">
-          {rows.map((row, index) => (
-            <tr key={row.id || index} className="hover:bg-slate-50">
-              {columns.map((column) => (
-                <td key={`${row.id || index}-${column.key}`} className="px-4 py-3 text-sm text-slate-700">
-                  {column.render ? column.render(row[column.key], row) : row[column.key]}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {rows.map((row, index) => {
+            const extraRowClass = typeof rowClassName === 'function' ? rowClassName(row, index) : '';
+
+            return (
+              <tr key={row.id || index} className={`hover:bg-slate-50 ${extraRowClass}`.trim()}>
+                {columns.map((column) => (
+                  <td key={`${row.id || index}-${column.key}`} className="px-4 py-3 text-sm text-slate-700">
+                    {column.render ? column.render(row[column.key], row) : row[column.key]}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
