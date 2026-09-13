@@ -1,7 +1,8 @@
 import { useState } from 'react';
+import { Outlet } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
-import { Outlet } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const adminLinks = [
   { to: '/admin', label: 'Dashboard' },
@@ -12,12 +13,13 @@ const adminLinks = [
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-slate-100">
       <div className="flex flex-col md:flex-row">
         <div className={`${sidebarOpen ? 'block' : 'hidden'} md:block`}>
-          <Sidebar title="Admin" items={adminLinks} />
+          <Sidebar title={user?.name || 'Admin'} items={adminLinks} />
         </div>
 
         <div className="min-w-0 flex-1">

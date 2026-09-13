@@ -1,1 +1,25 @@
-@import 'tailwindcss'
+@import 'tailwindcss';
+
+:root {
+  color: #0f172a;
+  background-color: #f8fafc;
+  font-family: Inter, 'Segoe UI', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: radial-gradient(circle at top, #dcfdf7 0%, #f0fdfa 30%, #f8fafc 60%, #ecfeff 100%);
+}
+
+#root {
+  min-height: 100vh;
+}

@@ -13,7 +13,7 @@ export default function Navbar({ title, subtitle, onMenuToggle }) {
   };
 
   return (
-    <header className="border-b border-slate-200 bg-white/90 backdrop-blur-sm">
+    <header className="border-b border-indigo-100 bg-white/85 shadow-sm backdrop-blur-sm">
       <div className="flex items-center justify-between px-4 py-3 md:px-6">
         <div className="flex items-center gap-3">
           <button
@@ -25,7 +25,7 @@ export default function Navbar({ title, subtitle, onMenuToggle }) {
           </button>
 
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Dashboard</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-teal-600">CareSync</p>
             <h2 className="text-xl font-bold text-slate-800">{title}</h2>
           </div>
         </div>
@@ -40,7 +40,7 @@ export default function Navbar({ title, subtitle, onMenuToggle }) {
             type="button"
             onClick={handleLogout}
             disabled={isLoggingOut}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-sm font-medium text-teal-700 hover:bg-teal-100 disabled:opacity-60"
           >
             <LogOut size={15} />
             Logout

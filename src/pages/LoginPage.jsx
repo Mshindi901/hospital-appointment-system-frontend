@@ -82,11 +82,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
-      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="flex min-h-screen items-center justify-center bg-transparent p-4">
+      <div className="w-full max-w-md rounded-2xl border border-teal-100 bg-white/90 p-6 shadow-[0_20px_60px_rgba(20,184,166,0.12)] backdrop-blur-sm">
         <div className="mb-6 text-center">
-          <p className="text-xs uppercase tracking-[0.2em] text-sky-600">Hospital Appointment System</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-teal-600">CareSync</p>
           <h1 className="mt-2 text-3xl font-bold text-slate-800">Sign in</h1>
+          <p className="mt-2 text-sm text-slate-600">Synchronizing doctors, patients, appointments</p>
         </div>
 
         <form className="space-y-4" onSubmit={handleSubmit} noValidate>
@@ -121,7 +122,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-lg bg-sky-600 px-3 py-2.5 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:bg-sky-400"
+            className="w-full rounded-lg bg-gradient-to-r from-teal-600 to-emerald-500 px-3 py-2.5 text-sm font-medium text-white transition hover:from-teal-700 hover:to-emerald-600 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {submitting ? 'Signing in...' : 'Sign in'}
           </button>

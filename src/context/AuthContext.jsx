@@ -32,7 +32,14 @@ export const AuthProvider = ({ children }) => {
       const decoded = decodeToken(savedToken);
 
       if (decoded) {
-        setUser(savedUser ? JSON.parse(savedUser) : { id: decoded.id, role: decoded.role });
+        const persistedUser = savedUser ? JSON.parse(savedUser) : {};
+        const nextUser = {
+          id: decoded.id,
+          role: decoded.role,
+          name: persistedUser.name || decoded.name || 'User',
+        };
+
+        setUser(nextUser);
         setToken(savedToken);
       } else {
         localStorage.removeItem('auth_token');
@@ -54,7 +61,7 @@ export const AuthProvider = ({ children }) => {
       throw new Error('Invalid token received');
     }
 
-    const nextUser = { id: decoded.id, role: decoded.role };
+    const nextUser = { id: decoded.id, role: decoded.role, name: decoded.name || 'User' };
 
     localStorage.setItem('auth_token', newToken);
     localStorage.setItem('auth_user', JSON.stringify(nextUser));

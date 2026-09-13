@@ -5,10 +5,10 @@ const baseLink =
 
 export default function Sidebar({ items, title }) {
   return (
-    <aside className="w-full border-b border-slate-200 bg-white md:w-64 md:border-b-0 md:border-r">
+    <aside className="w-full border-b border-teal-100 bg-gradient-to-b from-white to-teal-50/70 md:w-64 md:border-b-0 md:border-r">
       <div className="flex items-center justify-between border-b border-slate-200 px-4 py-4 md:block md:border-b-0">
         <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Hospital</p>
+          <p className="text-xs uppercase tracking-[0.18em] text-teal-600">CareSync</p>
           <h1 className="mt-1 text-xl font-bold text-slate-800">{title}</h1>
         </div>
       </div>
@@ -21,8 +21,8 @@ export default function Sidebar({ items, title }) {
             className={({ isActive }) =>
               `${baseLink} ${
                 isActive
-                  ? 'bg-sky-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  ? 'bg-gradient-to-r from-teal-600 to-emerald-500 text-white shadow-sm'
+                  : 'text-slate-600 hover:bg-teal-50 hover:text-slate-900'
               }`
             }
           >
