@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getUsers, updateUser, deleteUser } from '../api/users';
+import { createUser, getUsers, updateUser, deleteUser } from '../api/users';
 import DataTable from '../components/DataTable';
 import EmptyState from '../components/EmptyState';
 import ErrorState from '../components/ErrorState';
@@ -9,7 +9,7 @@ import Modal from '../components/Modal';
 import SearchInput from '../components/SearchInput';
 import ConfirmDialog from '../components/ConfirmDialog';
 
-const blankForm = { name: '', email: '' };
+const blankForm = { name: '', email: '', password: '', role: 'doctor', hospital_id: '' };
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState([]);
@@ -59,13 +59,28 @@ export default function AdminUsersPage() {
 
     if (!form.name.trim()) nextErrors.name = 'Name is required';
     if (!form.email.trim()) nextErrors.email = 'Email is required';
+    if (!editing && !form.password.trim()) nextErrors.password = 'Password is required';
+    if (!editing && !form.role.trim()) nextErrors.role = 'Role is required';
 
     return nextErrors;
   };
 
+  const openCreate = () => {
+    setEditing(null);
+    setForm(blankForm);
+    setFormErrors({});
+    setModalOpen(true);
+  };
+
   const openEdit = (user) => {
     setEditing(user);
-    setForm({ name: user.name || '', email: user.email || '' });
+    setForm({
+      name: user.name || '',
+      email: user.email || '',
+      password: '',
+      role: user.role || 'doctor',
+      hospital_id: user.hospital_id || '',
+    });
     setFormErrors({});
     setModalOpen(true);
   };
@@ -87,11 +102,16 @@ export default function AdminUsersPage() {
     setSubmitting(true);
 
     try {
-      await updateUser(editing.id, form);
+      if (editing) {
+        await updateUser(editing.id, { name: form.name, email: form.email });
+      } else {
+        await createUser(form);
+      }
+
       closeModal();
       await loadUsers();
     } catch (err) {
-      setFormErrors({ submit: err.response?.data?.message || 'Unable to update user' });
+      setFormErrors({ submit: err.response?.data?.message || (editing ? 'Unable to update user' : 'Unable to create user') });
     } finally {
       setSubmitting(false);
     }
@@ -131,7 +151,10 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-slate-800">Users</h2>
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <h2 className="text-2xl font-bold text-slate-800">Users</h2>
+        <button type="button" onClick={openCreate} className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700">Add User</button>
+      </div>
 
       <FilterBar>
         <div className="flex-1">
@@ -156,7 +179,7 @@ export default function AdminUsersPage() {
         <DataTable columns={columns} rows={filteredUsers.map((user) => ({ ...user, actions: '' }))} />
       )}
 
-      <Modal open={modalOpen} title="Edit user" onClose={closeModal}>
+      <Modal open={modalOpen} title={editing ? 'Edit user' : 'Add user'} onClose={closeModal}>
         <form className="space-y-4" onSubmit={handleSubmit} noValidate>
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Name</label>
@@ -178,12 +201,51 @@ export default function AdminUsersPage() {
             {formErrors.email && <p className="mt-1 text-xs text-red-600">{formErrors.email}</p>}
           </div>
 
+          {!editing && (
+            <>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">Password</label>
+                <input
+                  type="password"
+                  value={form.password}
+                  onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                />
+                {formErrors.password && <p className="mt-1 text-xs text-red-600">{formErrors.password}</p>}
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">Role</label>
+                <select
+                  value={form.role}
+                  onChange={(event) => setForm((prev) => ({ ...prev, role: event.target.value }))}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                >
+                  <option value="doctor">Doctor</option>
+                  <option value="manager">Manager</option>
+                  <option value="admin">Admin</option>
+                </select>
+                {formErrors.role && <p className="mt-1 text-xs text-red-600">{formErrors.role}</p>}
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">Hospital ID (optional)</label>
+                <input
+                  value={form.hospital_id}
+                  onChange={(event) => setForm((prev) => ({ ...prev, hospital_id: event.target.value }))}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  placeholder="Leave blank for no hospital"
+                />
+              </div>
+            </>
+          )}
+
           {formErrors.submit && <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{formErrors.submit}</div>}
 
           <div className="flex justify-end gap-3">
             <button type="button" onClick={closeModal} className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700">Cancel</button>
             <button type="submit" disabled={submitting} className="rounded-lg bg-sky-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-60">
-              {submitting ? 'Saving...' : 'Update'}
+              {submitting ? 'Saving...' : editing ? 'Update' : 'Create'}
             </button>
           </div>
         </form>
