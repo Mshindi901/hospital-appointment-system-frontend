@@ -78,15 +78,21 @@ export default function ManagerDashboardPage() {
       [...appointments]
         .sort((a, b) => new Date(a.date) - new Date(b.date))
         .slice(0, 6)
-        .map((appointment) => ({
-          id: appointment.id,
-          patient: appointment.patient_id || 'Unknown patient',
-          doctor: appointment.doctor_id || 'Unknown doctor',
-          date: appointment.date ? new Date(appointment.date).toLocaleDateString() : 'N/A',
-          time: appointment.start_time || 'N/A',
-          status: appointment.status || 'active',
-        })),
-    [appointments]
+        .map((appointment) => {
+          const patient = patients.find((item) => item.id === appointment.patient_id);
+          const doctorRecord = doctors.find((item) => item.id === appointment.doctor_id);
+          const doctorName = staff.find((item) => item.id === doctorRecord?.user_id)?.name || doctorRecord?.type || 'Unknown doctor';
+
+          return {
+            id: appointment.id,
+            patient: patient?.name || 'Unknown patient',
+            doctor: doctorName,
+            date: appointment.date ? new Date(appointment.date).toLocaleDateString() : 'N/A',
+            time: appointment.start_time || 'N/A',
+            status: appointment.status || 'active',
+          };
+        }),
+    [appointments, doctors, patients, staff]
   );
 
   const columns = [

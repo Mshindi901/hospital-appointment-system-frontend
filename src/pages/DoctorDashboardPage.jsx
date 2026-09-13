@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getAppointmentsByDoctor } from '../api/appointments';
 import { getDoctorByUserId } from '../api/doctors';
+import { getPatientsByHospital } from '../api/patients';
 import { useAuth } from '../context/AuthContext';
 import DataTable from '../components/DataTable';
 import EmptyState from '../components/EmptyState';
@@ -55,15 +56,29 @@ export default function DoctorDashboardPage() {
   }, [appointments]);
 
   const columns = [
-    { key: 'patient', label: 'Patient' },
+    { key: 'patientName', label: 'Patient' },
     { key: 'date', label: 'Date', render: (value) => value ? new Date(value).toLocaleDateString() : 'N/A' },
     { key: 'start_time', label: 'Time' },
-    { key: 'status', label: 'Status' },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (value) => (
+        <span
+          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+            value === 'active'
+              ? 'bg-emerald-100 text-emerald-700'
+              : 'bg-amber-100 text-amber-700'
+          }`}
+        >
+          {value === 'active' ? 'Active' : 'Inactive'}
+        </span>
+      ),
+    },
   ];
 
   const rows = appointments.map((appointment) => ({
     id: appointment.id,
-    patient: appointment.patient_id || 'Unknown patient',
+    patientName: appointment.patientName || 'Unknown patient',
     date: appointment.date,
     start_time: appointment.start_time || 'N/A',
     status: appointment.status || 'active',

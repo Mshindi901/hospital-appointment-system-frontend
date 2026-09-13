@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getAppointmentsByDoctor } from '../api/appointments';
 import { getDoctorByUserId } from '../api/doctors';
+import { getPatientsByHospital } from '../api/patients';
 import { useAuth } from '../context/AuthContext';
 import DataTable from '../components/DataTable';
 import EmptyState from '../components/EmptyState';
@@ -32,12 +33,24 @@ export default function DoctorAppointmentsPage() {
         return;
       }
 
+      const hospitalIds = [...new Set(doctorList.map((doctor) => doctor.hospital_id).filter(Boolean))];
+      const patientResponses = await Promise.all(
+        hospitalIds.map((hospitalId) => getPatientsByHospital(hospitalId).catch(() => ({ data: { data: [] } })))
+      );
+      const patients = patientResponses.flatMap((response) => response.data.data || []);
+      const patientLookup = Object.fromEntries(patients.map((patient) => [patient.id, patient.name]));
+
       const appointmentResponses = await Promise.all(
         doctorList.map((doctor) => getAppointmentsByDoctor(doctor.id).catch(() => ({ data: { data: [] } })))
       );
 
       const appointmentList = appointmentResponses.flatMap((response) => response.data.data || []);
-      setAppointments(appointmentList);
+      setAppointments(
+        appointmentList.map((appointment) => ({
+          ...appointment,
+          patientName: patientLookup[appointment.patient_id] || 'Unknown patient',
+        }))
+      );
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load appointments');
     } finally {
@@ -66,15 +79,29 @@ export default function DoctorAppointmentsPage() {
   }, [appointments, search, statusFilter, dateFilter]);
 
   const columns = [
-    { key: 'patient', label: 'Patient' },
+    { key: 'patientName', label: 'Patient' },
     { key: 'date', label: 'Date', render: (value) => (value ? new Date(value).toLocaleDateString() : 'N/A') },
     { key: 'start_time', label: 'Time' },
-    { key: 'status', label: 'Status' },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (value) => (
+        <span
+          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+            value === 'active'
+              ? 'bg-emerald-100 text-emerald-700'
+              : 'bg-amber-100 text-amber-700'
+          }`}
+        >
+          {value === 'active' ? 'Active' : 'Inactive'}
+        </span>
+      ),
+    },
   ];
 
   const rows = filteredAppointments.map((appointment) => ({
     id: appointment.id,
-    patient: appointment.patient_id || 'Unknown patient',
+    patientName: appointment.patientName || 'Unknown patient',
     date: appointment.date,
     start_time: appointment.start_time || 'N/A',
     status: appointment.status || 'active',

@@ -20,6 +20,7 @@ export default function ManagerAppointmentsPage() {
   const [appointments, setAppointments] = useState([]);
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
+  const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
@@ -45,15 +46,17 @@ export default function ManagerAppointmentsPage() {
         throw new Error('No hospital linked to this manager account');
       }
 
-      const [appointmentsResponse, patientsResponse, doctorsResponse] = await Promise.all([
+      const [appointmentsResponse, patientsResponse, doctorsResponse, usersResponse] = await Promise.all([
         getAppointmentsByHospital(hospitalId).catch(() => ({ data: { data: [] } })),
         getPatientsByHospital(hospitalId).catch(() => ({ data: { data: [] } })),
         getDoctorsByHospital(hospitalId).catch(() => ({ data: { data: [] } })),
+        getUsersByHospital(hospitalId).catch(() => ({ data: { data: [] } })),
       ]);
 
       setAppointments(appointmentsResponse.data.data || []);
       setPatients(patientsResponse.data.data || []);
       setDoctors(doctorsResponse.data.data || []);
+      setUsers(usersResponse.data.data || []);
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to load appointments');
     } finally {
@@ -70,7 +73,8 @@ export default function ManagerAppointmentsPage() {
 
     return appointments.filter((appointment) => {
       const patientName = patients.find((patient) => patient.id === appointment.patient_id)?.name || 'Unknown';
-      const doctorName = doctors.find((doctor) => doctor.id === appointment.doctor_id)?.type || 'Unknown';
+      const doctorRecord = doctors.find((doctor) => doctor.id === appointment.doctor_id);
+      const doctorName = users.find((user) => user.id === doctorRecord?.user_id)?.name || doctorRecord?.type || 'Unknown';
       const matchesStatus = statusFilter === 'all' || appointment.status === statusFilter;
       const matchesDate = dateFilter === 'all' || appointment.date?.slice(0, 10) === dateFilter;
       const matchesSearch =
@@ -166,6 +170,19 @@ export default function ManagerAppointmentsPage() {
     }
   };
 
+  const toggleStatus = async (appointment) => {
+    try {
+      const nextStatus = appointment.status === 'active' ? 'inactive' : 'active';
+      await updateAppointment(appointment.id, {
+        ...appointment,
+        status: nextStatus,
+      });
+      await loadAppointments();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Unable to update appointment status');
+    }
+  };
+
   const columns = [
     {
       key: 'patient_name',
@@ -175,11 +192,30 @@ export default function ManagerAppointmentsPage() {
     {
       key: 'doctor_name',
       label: 'Doctor',
-      render: (_, appointment) => doctors.find((doctor) => doctor.id === appointment.doctor_id)?.type || 'Unknown',
+      render: (_, appointment) => {
+        const doctorRecord = doctors.find((doctor) => doctor.id === appointment.doctor_id);
+        return users.find((user) => user.id === doctorRecord?.user_id)?.name || doctorRecord?.type || 'Unknown';
+      },
     },
     { key: 'date', label: 'Date', render: (value) => value ? new Date(value).toLocaleDateString() : 'N/A' },
     { key: 'start_time', label: 'Time' },
-    { key: 'status', label: 'Status' },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (_, appointment) => (
+        <button
+          type="button"
+          onClick={() => toggleStatus(appointment)}
+          className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium transition ${
+            appointment.status === 'active'
+              ? 'bg-emerald-100 text-emerald-700 ring-1 ring-inset ring-emerald-600/20'
+              : 'bg-amber-100 text-amber-700 ring-1 ring-inset ring-amber-600/20'
+          }`}
+        >
+          {appointment.status === 'active' ? 'Active' : 'Inactive'}
+        </button>
+      ),
+    },
     {
       key: 'actions',
       label: 'Actions',
@@ -253,7 +289,9 @@ export default function ManagerAppointmentsPage() {
             >
               <option value="">Select doctor</option>
               {doctors.map((doctor) => (
-                <option key={doctor.id} value={doctor.id}>{doctors.find((d) => d.id === doctor.id)?.type || 'Doctor'}</option>
+                <option key={doctor.id} value={doctor.id}>
+                  {users.find((user) => user.id === doctor.user_id)?.name || doctor.type || 'Doctor'}
+                </option>
               ))}
             </select>
             {formErrors.doctor_id && <p className="mt-1 text-xs text-red-600">{formErrors.doctor_id}</p>}
