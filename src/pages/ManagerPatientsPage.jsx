@@ -39,7 +39,7 @@ export default function ManagerPatientsPage() {
         throw new Error('No hospital linked to this manager account');
       }
 
-      const response = await getPatientsByHospital(hospitalId);
+      const response = await getPatientsByHospital(hospitalId).catch(() => ({ data: { data: [] } }));
       setPatients(response.data.data || []);
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to load patients');

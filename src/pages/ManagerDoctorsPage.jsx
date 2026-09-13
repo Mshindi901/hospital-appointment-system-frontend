@@ -41,8 +41,8 @@ export default function ManagerDoctorsPage() {
       }
 
       const [doctorsResponse, usersInHospital] = await Promise.all([
-        getDoctorsByHospital(hospitalId),
-        getUsersByHospital(hospitalId),
+        getDoctorsByHospital(hospitalId).catch(() => ({ data: { data: [] } })),
+        getUsersByHospital(hospitalId).catch(() => ({ data: { data: [] } })),
       ]);
 
       setDoctors(doctorsResponse.data.data || []);
