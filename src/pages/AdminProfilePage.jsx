@@ -12,8 +12,8 @@ export default function AdminProfilePage() {
           <p className="mt-1 text-lg font-semibold text-slate-800">{user?.role || 'Unknown'}</p>
         </div>
         <div className="rounded-xl bg-slate-50 p-4">
-          <p className="text-sm text-slate-500">User ID</p>
-          <p className="mt-1 text-lg font-semibold text-slate-800 break-all">{user?.id || 'N/A'}</p>
+          <p className="text-sm text-slate-500">Name</p>
+          <p className="mt-1 text-lg font-semibold text-slate-800 break-all">{user?.name || 'N/A'}</p>
         </div>
       </div>
     </div>
