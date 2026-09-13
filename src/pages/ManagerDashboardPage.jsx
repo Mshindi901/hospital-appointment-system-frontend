@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getAppointmentsByHospital } from '../api/appointments';
+import { getAppointmentsByHospital, updateAppointment } from '../api/appointments';
 import { getDoctorsByHospital } from '../api/doctors';
 import { getHospitalById } from '../api/hospitals';
 import { getPatientsByHospital } from '../api/patients';
@@ -21,44 +21,44 @@ export default function ManagerDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    const loadDashboard = async () => {
-      if (!user?.id) return;
+  const loadDashboard = async () => {
+    if (!user?.id) return;
 
-      try {
-        setLoading(true);
-        setError('');
+    try {
+      setLoading(true);
+      setError('');
 
-        const userResponse = await getUserById(user.id);
-        const userRecord = userResponse.data.data;
-        const hospitalId = userRecord?.hospital_id;
+      const userResponse = await getUserById(user.id);
+      const userRecord = userResponse.data.data;
+      const hospitalId = userRecord?.hospital_id;
 
-        if (!hospitalId) {
-          throw new Error('No hospital linked to this manager account');
-        }
-
-        const [hospitalResponse, doctorsResponse, patientsResponse, appointmentsResponse, staffResponse] = await Promise.all([
-          getHospitalById(hospitalId).catch(() => ({ data: { data: null } })),
-          getDoctorsByHospital(hospitalId).catch(() => ({ data: { data: [] } })),
-          getPatientsByHospital(hospitalId).catch(() => ({ data: { data: [] } })),
-          getAppointmentsByHospital(hospitalId).catch(() => ({ data: { data: [] } })),
-          getUsersByHospital(hospitalId).catch(() => ({ data: { data: [] } })),
-        ]);
-
-        const nextHospital = hospitalResponse.data.data || null;
-
-        setHospital(nextHospital);
-        setDoctors(doctorsResponse.data.data || []);
-        setPatients(patientsResponse.data.data || []);
-        setAppointments(appointmentsResponse.data.data || []);
-        setStaff(staffResponse.data.data || []);
-      } catch (err) {
-        setError(err.response?.data?.message || err.message || 'Failed to load manager dashboard');
-      } finally {
-        setLoading(false);
+      if (!hospitalId) {
+        throw new Error('No hospital linked to this manager account');
       }
-    };
 
+      const [hospitalResponse, doctorsResponse, patientsResponse, appointmentsResponse, staffResponse] = await Promise.all([
+        getHospitalById(hospitalId).catch(() => ({ data: { data: null } })),
+        getDoctorsByHospital(hospitalId).catch(() => ({ data: { data: [] } })),
+        getPatientsByHospital(hospitalId).catch(() => ({ data: { data: [] } })),
+        getAppointmentsByHospital(hospitalId).catch(() => ({ data: { data: [] } })),
+        getUsersByHospital(hospitalId).catch(() => ({ data: { data: [] } })),
+      ]);
+
+      const nextHospital = hospitalResponse.data.data || null;
+
+      setHospital(nextHospital);
+      setDoctors(doctorsResponse.data.data || []);
+      setPatients(patientsResponse.data.data || []);
+      setAppointments(appointmentsResponse.data.data || []);
+      setStaff(staffResponse.data.data || []);
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'Failed to load manager dashboard');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadDashboard();
   }, [user]);
 
@@ -90,17 +90,60 @@ export default function ManagerDashboardPage() {
             date: appointment.date ? new Date(appointment.date).toLocaleDateString() : 'N/A',
             time: appointment.start_time || 'N/A',
             status: appointment.status || 'active',
+            rawAppointment: appointment,
           };
         }),
     [appointments, doctors, patients, staff]
   );
+
+  const toggleStatus = async (appointment) => {
+    try {
+      const nextStatus = appointment.status === 'active' ? 'inactive' : 'active';
+      await updateAppointment(appointment.id, {
+        ...appointment,
+        status: nextStatus,
+      });
+      await loadDashboard();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Unable to update appointment status');
+    }
+  };
 
   const columns = [
     { key: 'patient', label: 'Patient' },
     { key: 'doctor', label: 'Doctor' },
     { key: 'date', label: 'Date' },
     { key: 'time', label: 'Time' },
-    { key: 'status', label: 'Status' },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (_, row) => (
+        <button
+          type="button"
+          onClick={() => toggleStatus(row.rawAppointment)}
+          className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium transition ${
+            row.status === 'active'
+              ? 'bg-emerald-100 text-emerald-700 ring-1 ring-inset ring-emerald-600/20'
+              : 'bg-amber-100 text-amber-700 ring-1 ring-inset ring-amber-600/20'
+          }`}
+        >
+          {row.status === 'active' ? 'Active' : 'Inactive'}
+        </button>
+      ),
+    },
+    {
+      key: 'actions',
+      label: 'Actions',
+      render: (_, row) => (
+        <button
+          type="button"
+          onClick={() => toggleStatus(row.rawAppointment)}
+          className="rounded-lg bg-sky-600 px-2 py-1 text-xs font-medium text-white hover:bg-sky-700"
+        >
+          Toggle Status
+        </button>
+      ),
+    },
   ];
 
   if (loading) return <Loading message="Loading manager dashboard..." />;
@@ -142,7 +185,12 @@ export default function ManagerDashboardPage() {
         {rows.length === 0 ? (
           <EmptyState title="No appointments found." message="There are no upcoming appointments for this hospital." />
         ) : (
-          <DataTable columns={columns} rows={rows} emptyMessage="No appointments found." />
+          <DataTable
+            columns={columns}
+            rows={rows}
+            emptyMessage="No appointments found."
+            rowClassName={(row) => (row.status === 'active' ? 'bg-emerald-50/80' : '')}
+          />
         )}
       </div>
     </div>
