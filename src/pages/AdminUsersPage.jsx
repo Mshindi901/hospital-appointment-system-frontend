@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { getHospitals } from '../api/hospitals';
 import { createUser, getUsers, updateUser, deleteUser } from '../api/users';
 import DataTable from '../components/DataTable';
 import EmptyState from '../components/EmptyState';
@@ -13,6 +14,7 @@ const blankForm = { name: '', email: '', password: '', role: 'doctor', hospital_
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState([]);
+  const [hospitals, setHospitals] = useState([]);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [loading, setLoading] = useState(true);
@@ -37,8 +39,18 @@ export default function AdminUsersPage() {
     }
   };
 
+  const loadHospitals = async () => {
+    try {
+      const response = await getHospitals();
+      setHospitals(response.data.data || []);
+    } catch (err) {
+      console.error('Failed to load hospitals', err);
+    }
+  };
+
   useEffect(() => {
     loadUsers();
+    loadHospitals();
   }, []);
 
   const filteredUsers = useMemo(() => {
@@ -229,13 +241,17 @@ export default function AdminUsersPage() {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">Hospital ID (optional)</label>
-                <input
+                <label className="mb-1 block text-sm font-medium text-slate-700">Hospital</label>
+                <select
                   value={form.hospital_id}
                   onChange={(event) => setForm((prev) => ({ ...prev, hospital_id: event.target.value }))}
                   className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                  placeholder="Leave blank for no hospital"
-                />
+                >
+                  <option value="">No hospital</option>
+                  {hospitals.map((hospital) => (
+                    <option key={hospital.id} value={hospital.id}>{hospital.name}</option>
+                  ))}
+                </select>
               </div>
             </>
           )}
