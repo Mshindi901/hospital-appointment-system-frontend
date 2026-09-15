@@ -28,7 +28,16 @@ export default function StaffPatientHistoryPage() {
     try {
       setLoading(true);
       setError('');
-      const [userResponse, staffResponse] = await Promise.all([getUserById(user.id), getStaffByUser(user.id)]);
+      const userResponse = await getUserById(user.id);
+      let staffResponse;
+      try {
+        staffResponse = await getStaffByUser(user.id);
+      } catch (staffError) {
+        if (staffError.response?.status === 404) {
+          throw new Error('Your staff account is not linked to a staff record. Ask a manager to add your staff record.');
+        }
+        throw staffError;
+      }
       const nextHospitalId = userResponse.data.data?.hospital_id;
       const staffRecord = staffResponse.data.data;
       if (!nextHospitalId || !staffRecord?.id) throw new Error('No staff record is linked to this account');
