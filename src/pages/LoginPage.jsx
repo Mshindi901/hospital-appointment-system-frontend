@@ -21,6 +21,7 @@ export default function LoginPage() {
       admin: '/admin',
       manager: '/manager',
       doctor: '/doctor',
+      staff: '/staff',
     };
 
     navigate(dashboardMap[user.role] || '/login', { replace: true });
@@ -71,6 +72,7 @@ export default function LoginPage() {
         admin: '/admin',
         manager: '/manager',
         doctor: '/doctor',
+        staff: '/staff',
       };
 
       navigate(dashboardMap[decoded.role] || '/login', { replace: true });
@@ -122,7 +124,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-lg bg-gradient-to-r from-teal-600 to-emerald-500 px-3 py-2.5 text-sm font-medium text-white transition hover:from-teal-700 hover:to-emerald-600 disabled:cursor-not-allowed disabled:opacity-70"
+            className="w-full rounded-lg bg-linear-to-r from-teal-600 to-emerald-500 px-3 py-2.5 text-sm font-medium text-white transition hover:from-teal-700 hover:to-emerald-600 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {submitting ? 'Signing in...' : 'Sign in'}
           </button>

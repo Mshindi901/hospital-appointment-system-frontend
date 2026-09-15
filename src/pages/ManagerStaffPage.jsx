@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { createUser, getUserById, getUsersByHospital } from '../api/users';
+import { getUserById, getUsersByHospital } from '../api/users';
 import { createStaffRecord, getStaffByHospital } from '../api/staff';
 import { useAuth } from '../context/AuthContext';
 import DataTable from '../components/DataTable';
@@ -8,7 +8,7 @@ import ErrorState from '../components/ErrorState';
 import Loading from '../components/Loading';
 import Modal from '../components/Modal';
 
-const blankForm = { name: '', email: '', password: '', role: 'staff', department: '' };
+const blankForm = { user_id: '', department: '' };
 
 export default function ManagerStaffPage() {
   const { user } = useAuth();
@@ -41,7 +41,7 @@ export default function ManagerStaffPage() {
         getUsersByHospital(nextHospitalId).catch(() => ({ data: { data: [] } })),
         getStaffByHospital(nextHospitalId).catch(() => ({ data: { data: [] } })),
       ]);
-      setStaff((usersResponse.data.data || []).filter((item) => item.role !== 'admin'));
+      setStaff((usersResponse.data.data || []).filter((item) => item.role === 'staff'));
       setStaffRecords(recordsResponse.data.data || []);
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to load staff');
@@ -69,10 +69,8 @@ export default function ManagerStaffPage() {
   const validate = () => {
     const nextErrors = {};
 
-    if (!form.name.trim()) nextErrors.name = 'Name is required';
-    if (!form.email.trim()) nextErrors.email = 'Email is required';
-    if (!form.password.trim()) nextErrors.password = 'Password is required';
-    if (!form.role.trim()) nextErrors.role = 'Role is required';
+    if (!form.user_id.trim()) nextErrors.user_id = 'Staff user is required';
+    if (!form.department.trim()) nextErrors.department = 'Department is required';
 
     return nextErrors;
   };
@@ -87,10 +85,7 @@ export default function ManagerStaffPage() {
     setSubmitting(true);
 
     try {
-      const userResponse = await createUser({ name: form.name, email: form.email, password: form.password, role: form.role, hospital_id: hospitalId });
-      if (form.role === 'staff' && userResponse.data.data?.id) {
-        await createStaffRecord({ user_id: userResponse.data.data.id, hospital_id: hospitalId, department: form.department });
-      }
+      await createStaffRecord({ user_id: form.user_id, hospital_id: hospitalId, department: form.department });
       closeModal();
       await loadStaff();
     } catch (err) {
@@ -113,8 +108,8 @@ export default function ManagerStaffPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <h2 className="text-2xl font-bold text-slate-800">Staff</h2>
-        <button type="button" onClick={openCreate} className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700">Add Staff</button>
+        <h2 className="text-2xl font-bold text-slate-800">Staff records</h2>
+        <button type="button" onClick={openCreate} className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700">Add staff record</button>
       </div>
 
       {staff.length === 0 ? (
@@ -123,64 +118,28 @@ export default function ManagerStaffPage() {
         <DataTable columns={columns} rows={staff} />
       )}
 
-      <Modal open={modalOpen} title="Add staff member" onClose={closeModal}>
+      <Modal open={modalOpen} title="Add staff record" onClose={closeModal}>
         <form className="space-y-4" onSubmit={handleSubmit} noValidate>
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Name</label>
-            <input
-              value={form.name}
-              onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            />
-            {formErrors.name && <p className="mt-1 text-xs text-red-600">{formErrors.name}</p>}
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Email</label>
-            <input
-              value={form.email}
-              onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            />
-            {formErrors.email && <p className="mt-1 text-xs text-red-600">{formErrors.email}</p>}
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Password</label>
-            <input
-              type="password"
-              value={form.password}
-              onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            />
-            {formErrors.password && <p className="mt-1 text-xs text-red-600">{formErrors.password}</p>}
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Role</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Staff user</label>
             <select
-              value={form.role}
-              onChange={(event) => setForm((prev) => ({ ...prev, role: event.target.value }))}
+              value={form.user_id}
+              onChange={(event) => setForm((prev) => ({ ...prev, user_id: event.target.value }))}
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
             >
-              <option value="doctor">Doctor</option>
-              <option value="manager">Manager</option>
-              <option value="staff">Staff</option>
+              <option value="">Select staff user</option>
+              {staff.filter((item) => !staffRecords.some((record) => record.user_id === item.id)).map((item) => (
+                <option key={item.id} value={item.id}>{item.name} ({item.email})</option>
+              ))}
             </select>
-            {formErrors.role && <p className="mt-1 text-xs text-red-600">{formErrors.role}</p>}
+            {formErrors.user_id && <p className="mt-1 text-xs text-red-600">{formErrors.user_id}</p>}
           </div>
 
-          {form.role === 'staff' && (
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Department</label>
-              <input
-                value={form.department}
-                onChange={(event) => setForm((prev) => ({ ...prev, department: event.target.value }))}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                placeholder="Reception, nursing, records"
-              />
-            </div>
-          )}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Department</label>
+            <input value={form.department} onChange={(event) => setForm((prev) => ({ ...prev, department: event.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="Reception, nursing, records" />
+            {formErrors.department && <p className="mt-1 text-xs text-red-600">{formErrors.department}</p>}
+          </div>
 
           {formErrors.submit && <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{formErrors.submit}</div>}
 

@@ -182,6 +182,7 @@ export default function AdminUsersPage() {
           <option value="admin">Admin</option>
           <option value="manager">Manager</option>
           <option value="doctor">Doctor</option>
+          <option value="staff">Staff</option>
         </select>
       </FilterBar>
 
@@ -236,6 +237,7 @@ export default function AdminUsersPage() {
                   <option value="doctor">Doctor</option>
                   <option value="manager">Manager</option>
                   <option value="admin">Admin</option>
+                  <option value="staff">Staff</option>
                 </select>
                 {formErrors.role && <p className="mt-1 text-xs text-red-600">{formErrors.role}</p>}
               </div>

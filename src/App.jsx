@@ -4,6 +4,7 @@ import RoleRoute from './components/RoleRoute';
 import AdminLayout from './layouts/AdminLayout';
 import ManagerLayout from './layouts/ManagerLayout';
 import DoctorLayout from './layouts/DoctorLayout';
+import StaffLayout from './layouts/StaffLayout';
 import LoginPage from './pages/LoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import AdminHospitalsPage from './pages/AdminHospitalsPage';
@@ -20,6 +21,7 @@ import ManagerProfilePage from './pages/ManagerProfilePage';
 import DoctorDashboardPage from './pages/DoctorDashboardPage';
 import DoctorAppointmentsPage from './pages/DoctorAppointmentsPage';
 import DoctorProfilePage from './pages/DoctorProfilePage';
+import StaffPatientHistoryPage from './pages/StaffPatientHistoryPage';
 import { Analytics } from '@vercel/analytics/react';
 
 function App() {
@@ -57,6 +59,12 @@ function App() {
             <Route path="/doctor" element={<DoctorDashboardPage />} />
             <Route path="/doctor/appointments" element={<DoctorAppointmentsPage />} />
             <Route path="/doctor/profile" element={<DoctorProfilePage />} />
+          </Route>
+        </Route>
+
+        <Route element={<RoleRoute allowedRoles={['staff']} />}>
+          <Route element={<StaffLayout />}>
+            <Route path="/staff" element={<StaffPatientHistoryPage />} />
           </Route>
         </Route>
       </Route>
