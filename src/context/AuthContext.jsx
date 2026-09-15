@@ -14,7 +14,7 @@ const decodeToken = (token) => {
     );
 
     return JSON.parse(jsonPayload);
-  } catch (error) {
+  } catch {
     return null;
   }
 };

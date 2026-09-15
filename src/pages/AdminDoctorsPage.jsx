@@ -12,7 +12,6 @@ import SearchInput from '../components/SearchInput';
 export default function AdminDoctorsPage() {
   const [doctors, setDoctors] = useState([]);
   const [users, setUsers] = useState([]);
-  const [hospitals, setHospitals] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -41,7 +40,6 @@ export default function AdminDoctorsPage() {
         };
       });
 
-      setHospitals(hospitalList);
       setUsers(userList);
       setDoctors(doctorRows);
     } catch (err) {

@@ -9,6 +9,7 @@ const managerLinks = [
   { to: '/manager/patients', label: 'Patients' },
   { to: '/manager/appointments', label: 'Appointments' },
   { to: '/manager/staff', label: 'Staff' },
+  { to: '/manager/patient-history', label: 'Patient history' },
   { to: '/manager/hospital', label: 'Hospital' },
   { to: '/manager/profile', label: 'Profile' },
 ];

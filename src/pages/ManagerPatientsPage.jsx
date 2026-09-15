@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createPatient, deletePatient, getPatientsByHospital, updatePatient } from '../api/patients';
-import { getUserById, getUsersByHospital } from '../api/users';
+import { getUserById } from '../api/users';
 import { useAuth } from '../context/AuthContext';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataTable from '../components/DataTable';
@@ -11,7 +11,7 @@ import Loading from '../components/Loading';
 import Modal from '../components/Modal';
 import SearchInput from '../components/SearchInput';
 
-const blankForm = { name: '', email: '', address: '' };
+const blankForm = { name: '', email: '', address: '', gender: '', dob: '', allergies: '', blood_type: '' };
 
 export default function ManagerPatientsPage() {
   const { user } = useAuth();
@@ -85,6 +85,10 @@ export default function ManagerPatientsPage() {
       name: patient.name || '',
       email: patient.email || '',
       address: patient.address || '',
+      gender: patient.gender || '',
+      dob: patient.dob ? new Date(patient.dob).toISOString().slice(0, 10) : '',
+      allergies: Array.isArray(patient.allergies) ? patient.allergies.join(', ') : patient.allergies || '',
+      blood_type: patient.blood_type || '',
     });
     setFormErrors({});
     setModalOpen(true);
@@ -109,7 +113,11 @@ export default function ManagerPatientsPage() {
     try {
       const userResponse = await getUserById(user.id);
       const hospitalId = userResponse.data.data?.hospital_id;
-      const payload = { ...form, hospital_id: hospitalId };
+      const payload = {
+        ...form,
+        allergies: form.allergies.split(',').map((item) => item.trim()).filter(Boolean),
+        hospital_id: hospitalId,
+      };
 
       if (editing) {
         await updatePatient(editing.id, payload);
@@ -143,6 +151,9 @@ export default function ManagerPatientsPage() {
     { key: 'name', label: 'Name' },
     { key: 'email', label: 'Email' },
     { key: 'address', label: 'Address' },
+    { key: 'gender', label: 'Gender', render: (value) => value ? value.toUpperCase() : 'N/A' },
+    { key: 'blood_type', label: 'Blood type', render: (value) => value || 'N/A' },
+    { key: 'allergies', label: 'Allergies', render: (value) => Array.isArray(value) && value.length ? value.join(', ') : 'None' },
     {
       key: 'actions',
       label: 'Actions',
@@ -206,6 +217,29 @@ export default function ManagerPatientsPage() {
               onChange={(event) => setForm((prev) => ({ ...prev, address: event.target.value }))}
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
             />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Gender</label>
+              <select value={form.gender} onChange={(event) => setForm((prev) => ({ ...prev, gender: event.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                <option value="">Not specified</option>
+                <option value="m">Male</option>
+                <option value="f">Female</option>
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Date of birth</label>
+              <input type="date" value={form.dob} onChange={(event) => setForm((prev) => ({ ...prev, dob: event.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Blood type</label>
+              <input value={form.blood_type} onChange={(event) => setForm((prev) => ({ ...prev, blood_type: event.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="O+" />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Allergies</label>
+              <input value={form.allergies} onChange={(event) => setForm((prev) => ({ ...prev, allergies: event.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="Penicillin, peanuts" />
+            </div>
           </div>
 
           {formErrors.submit && <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{formErrors.submit}</div>}

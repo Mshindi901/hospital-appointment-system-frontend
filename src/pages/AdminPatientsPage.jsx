@@ -10,7 +10,6 @@ import SearchInput from '../components/SearchInput';
 
 export default function AdminPatientsPage() {
   const [patients, setPatients] = useState([]);
-  const [hospitals, setHospitals] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -31,7 +30,6 @@ export default function AdminPatientsPage() {
         hospitalName: hospitalList.find((hospital) => hospital.id === patient.hospital_id)?.name || 'Unknown hospital',
       }));
 
-      setHospitals(hospitalList);
       setPatients(enriched);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load patients');
@@ -60,6 +58,9 @@ export default function AdminPatientsPage() {
     { key: 'email', label: 'Email' },
     { key: 'address', label: 'Address' },
     { key: 'hospitalName', label: 'Hospital' },
+    { key: 'gender', label: 'Gender', render: (value) => value ? value.toUpperCase() : 'N/A' },
+    { key: 'blood_type', label: 'Blood type', render: (value) => value || 'N/A' },
+    { key: 'allergies', label: 'Allergies', render: (value) => Array.isArray(value) && value.length ? value.join(', ') : 'None' },
   ];
 
   if (loading) return <Loading message="Loading patients..." />;

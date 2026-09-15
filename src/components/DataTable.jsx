@@ -10,14 +10,14 @@ export default function DataTable({ columns, rows, emptyMessage = 'No records fo
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
       <table className="min-w-full divide-y divide-slate-200 text-left">
-        <thead className="bg-slate-50">
+        <thead className="bg-slate-100/80">
           <tr>
             {columns.map((column) => (
               <th
                 key={column.key}
-                className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500"
+                className="whitespace-nowrap px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500"
               >
                 <div className="flex items-center gap-2">
                   {column.label}
@@ -34,7 +34,7 @@ export default function DataTable({ columns, rows, emptyMessage = 'No records fo
             return (
               <tr key={row.id || index} className={`hover:bg-slate-50 ${extraRowClass}`.trim()}>
                 {columns.map((column) => (
-                  <td key={`${row.id || index}-${column.key}`} className="px-4 py-3 text-sm text-slate-700">
+                    <td key={`${row.id || index}-${column.key}`} className="whitespace-nowrap px-4 py-3 text-sm text-slate-700">
                     {column.render ? column.render(row[column.key], row) : row[column.key]}
                   </td>
                 ))}

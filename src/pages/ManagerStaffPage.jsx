@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createUser, getUserById, getUsersByHospital } from '../api/users';
+import { createStaffRecord, getStaffByHospital } from '../api/staff';
 import { useAuth } from '../context/AuthContext';
 import DataTable from '../components/DataTable';
 import EmptyState from '../components/EmptyState';
@@ -7,11 +8,12 @@ import ErrorState from '../components/ErrorState';
 import Loading from '../components/Loading';
 import Modal from '../components/Modal';
 
-const blankForm = { name: '', email: '', password: '', role: 'doctor' };
+const blankForm = { name: '', email: '', password: '', role: 'staff', department: '' };
 
 export default function ManagerStaffPage() {
   const { user } = useAuth();
   const [staff, setStaff] = useState([]);
+  const [staffRecords, setStaffRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
@@ -35,8 +37,12 @@ export default function ManagerStaffPage() {
 
       setHospitalId(nextHospitalId);
 
-      const response = await getUsersByHospital(nextHospitalId);
-      setStaff((response.data.data || []).filter((item) => item.role !== 'admin'));
+      const [usersResponse, recordsResponse] = await Promise.all([
+        getUsersByHospital(nextHospitalId).catch(() => ({ data: { data: [] } })),
+        getStaffByHospital(nextHospitalId).catch(() => ({ data: { data: [] } })),
+      ]);
+      setStaff((usersResponse.data.data || []).filter((item) => item.role !== 'admin'));
+      setStaffRecords(recordsResponse.data.data || []);
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to load staff');
     } finally {
@@ -81,7 +87,10 @@ export default function ManagerStaffPage() {
     setSubmitting(true);
 
     try {
-      await createUser({ ...form, hospital_id: hospitalId });
+      const userResponse = await createUser({ name: form.name, email: form.email, password: form.password, role: form.role, hospital_id: hospitalId });
+      if (form.role === 'staff' && userResponse.data.data?.id) {
+        await createStaffRecord({ user_id: userResponse.data.data.id, hospital_id: hospitalId, department: form.department });
+      }
       closeModal();
       await loadStaff();
     } catch (err) {
@@ -95,6 +104,7 @@ export default function ManagerStaffPage() {
     { key: 'name', label: 'Name' },
     { key: 'email', label: 'Email' },
     { key: 'role', label: 'Role' },
+    { key: 'department', label: 'Department', render: (_, item) => staffRecords.find((record) => record.user_id === item.id)?.department || 'N/A' },
   ];
 
   if (loading) return <Loading message="Loading staff..." />;
@@ -155,9 +165,22 @@ export default function ManagerStaffPage() {
             >
               <option value="doctor">Doctor</option>
               <option value="manager">Manager</option>
+              <option value="staff">Staff</option>
             </select>
             {formErrors.role && <p className="mt-1 text-xs text-red-600">{formErrors.role}</p>}
           </div>
+
+          {form.role === 'staff' && (
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Department</label>
+              <input
+                value={form.department}
+                onChange={(event) => setForm((prev) => ({ ...prev, department: event.target.value }))}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                placeholder="Reception, nursing, records"
+              />
+            </div>
+          )}
 
           {formErrors.submit && <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{formErrors.submit}</div>}
 

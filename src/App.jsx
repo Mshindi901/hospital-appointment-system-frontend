@@ -14,6 +14,7 @@ import ManagerDoctorsPage from './pages/ManagerDoctorsPage';
 import ManagerPatientsPage from './pages/ManagerPatientsPage';
 import ManagerAppointmentsPage from './pages/ManagerAppointmentsPage';
 import ManagerStaffPage from './pages/ManagerStaffPage';
+import ManagerPatientHistoryPage from './pages/ManagerPatientHistoryPage';
 import ManagerHospitalPage from './pages/ManagerHospitalPage';
 import ManagerProfilePage from './pages/ManagerProfilePage';
 import DoctorDashboardPage from './pages/DoctorDashboardPage';
@@ -45,6 +46,7 @@ function App() {
             <Route path="/manager/patients" element={<ManagerPatientsPage />} />
             <Route path="/manager/appointments" element={<ManagerAppointmentsPage />} />
             <Route path="/manager/staff" element={<ManagerStaffPage />} />
+            <Route path="/manager/patient-history" element={<ManagerPatientHistoryPage />} />
             <Route path="/manager/hospital" element={<ManagerHospitalPage />} />
             <Route path="/manager/profile" element={<ManagerProfilePage />} />
           </Route>

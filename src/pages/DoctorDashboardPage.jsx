@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getAppointmentsByDoctor } from '../api/appointments';
 import { getDoctorByUserId } from '../api/doctors';
-import { getPatientsByHospital } from '../api/patients';
 import { useAuth } from '../context/AuthContext';
 import DataTable from '../components/DataTable';
 import EmptyState from '../components/EmptyState';
